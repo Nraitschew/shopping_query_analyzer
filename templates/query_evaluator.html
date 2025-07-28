@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+
+{% block title %}Query Evaluator - Shopping Intelligence Suite{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Background animation */
+    .page-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+    }
+
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.3;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        top: -100px;
+        left: -100px;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        bottom: -100px;
+        right: -100px;
+        animation-delay: 5s;
+    }
+
+    .orb-3 {
+        width: 350px;
+        height: 350px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-delay: 10s;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        25% {
+            transform: translate(50px, -50px) scale(1.1);
+        }
+        50% {
+            transform: translate(-50px, 50px) scale(0.9);
+        }
+        75% {
+            transform: translate(30px, 30px) scale(1.05);
+        }
+    }
+
+    /* Page header */
+    .page-header {
+        text-align: center;
+        padding: 3rem 0;
+        position: relative;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.25rem;
+        color: var(--gray-600);
+    }
+
+    /* Input section */
+    .input-section {
+        max-width: 800px;
+        margin: 0 auto 3rem;
+    }
+
+    .input-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .input-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+        background-size: 200% 100%;
+        animation: gradientMove 4s linear infinite;
+    }
+
+    @keyframes gradientMove {
+        to { background-position: -200% 0; }
+    }
+
+    .query-input {
+        width: 100%;
+        padding: 1.5rem;
+        font-size: 1.125rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        transition: var(--transition);
+        font-family: inherit;
+        margin-bottom: 1.5rem;
+    }
+
+    .query-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--white);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Loading state */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .loading.active {
+        display: block;
+    }
+
+    .loading-dots {
+        display: inline-flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        animation: bounce 1.4s infinite ease-in-out;
+    }
+
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    .dot:nth-child(3) { animation-delay: 0; }
+
+    @keyframes bounce {
+        0%, 80%, 100% {
+            transform: scale(0);
+            opacity: 0.5;
+        }
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Results section */
+    .results {
+        display: none;
+        max-width: 1000px;
+        margin: 0 auto;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .results.active {
+        display: block;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Score cards */
+    .scores-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .score-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .score-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .score-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .score-visual {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+    }
+
+    .score-ring {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    .score-ring circle {
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+    }
+
+    .score-ring .background {
+        stroke: var(--gray-200);
+    }
+
+    .score-ring .progress {
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .score-value {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--dark);
+    }
+
+    /* Info cards */
+    .info-grid {
+        display: grid;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+    .info-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: var(--gradient-primary);
+        color: var(--white);
+        border-radius: 24px;
+        font-weight: 600;
+    }
+
+    .list-items {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .list-items li {
+        padding: 0.75rem 1rem;
+        background: var(--gray-100);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary);
+        transition: var(--transition);
+    }
+
+    .list-items li:hover {
+        background: var(--gray-200);
+        transform: translateX(4px);
+    }
+
+    /* Advice section */
+    .advice-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: var(--white);
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .advice-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        to { transform: rotate(360deg); }
+    }
+
+    .advice-section h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .advice-text {
+        line-height: 1.8;
+        opacity: 0.95;
+        position: relative;
+    }
+
+    .improved-query {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        font-weight: 600;
+        position: relative;
+    }
+
+    /* Error message */
+    .error-message {
+        background: rgba(245, 54, 92, 0.1);
+        border: 1px solid rgba(245, 54, 92, 0.3);
+        color: var(--secondary);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        display: none;
+        text-align: center;
+    }
+
+    .error-message.active {
+        display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .scores-container {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .input-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-background">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Shopping Query Evaluator</h1>
+        <p>Transform your searches into perfect shopping queries</p>
+    </div>
+
+    <div class="input-section">
+        <div class="input-card">
+            <input 
+                type="text" 
+                class="query-input" 
+                id="queryInput" 
+                placeholder="Enter your shopping query (e.g., 'laptop for gaming under $1500')"
+                autocomplete="off"
+            >
+            <button class="submit-btn" id="submitBtn" onclick="evaluateQuery()">
+                Analyze Query
+            </button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <p>Analyzing your query...</p>
+        </div>
+    </div>
+
+    <div class="results" id="results">
+        <div class="scores-container">
+            <div class="score-card">
+                <div class="score-label">Specificity Score</div>
+                <div class="score-visual">
+                    <svg class="score-ring" viewBox="0 0 100 100">
+                        <circle class="background" cx="50" cy="50" r="45" />
+                        <circle class="progress" id="specificityRing" cx="50" cy="50" r="45" 
+                            style="stroke: #667eea" />
+                    </svg>
+                    <div class="score-value" id="specificityScore">0</div>
+                </div>
+            </div>
+            <div class="score-card">
+                <div class="score-label">Quality Score</div>
+                <div class="score-visual">
+                    <svg class="score-ring" viewBox="0 0 100 100">
+                        <circle class="background" cx="50" cy="50" r="45" />
+                        <circle class="progress" id="qualityRing" cx="50" cy="50" r="45" 
+                            style="stroke: #764ba2" />
+                    </svg>
+                    <div class="score-value" id="qualityScore">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">Category</div>
+                <div>
+                    <span class="category-badge" id="category">Loading...</span>
+                    <span id="subcategory" style="margin-left: 1rem; color: var(--gray-600);"></span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">Search Intent</div>
+                <div id="searchIntent" style="font-size: 1.125rem; font-weight: 600;">Analyzing...</div>
+            </div>
+
+            <div class="info-card" id="strengthsCard">
+                <div class="info-label">Query Strengths</div>
+                <ul class="list-items" id="strengths"></ul>
+            </div>
+
+            <div class="info-card" id="missingCard">
+                <div class="info-label">Missing Information</div>
+                <ul class="list-items" id="missingInfo"></ul>
+            </div>
+        </div>
+
+        <div class="advice-section">
+            <h3>Improvement Advice</h3>
+            <p class="advice-text" id="improvementAdvice">Loading advice...</p>
+            <div class="improved-query" id="improvedQuery">Loading suggestion...</div>
+        </div>
+    </div>
+</div>
+
+<svg style="position: absolute; width: 0; height: 0;">
+    <defs>
+        <linearGradient id="scoreGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+</svg>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Handle Enter key
+    document.getElementById('queryInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            evaluateQuery();
+        }
+    });
+
+    async function evaluateQuery() {
+        const queryInput = document.getElementById('queryInput');
+        const query = queryInput.value.trim();
+        
+        if (!query) {
+            showError('Please enter a shopping query to analyze');
+            return;
+        }
+
+        // Reset UI
+        hideError();
+        showLoading();
+        hideResults();
+
+        try {
+            const response = await fetch('/api/evaluate-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to evaluate query');
+            }
+
+            const data = await response.json();
+            console.log('Query evaluation result:', data);
+            
+            displayResults(data);
+            hideLoading();
+            showResults();
+
+        } catch (error) {
+            console.error('Error:', error);
+            hideLoading();
+            showError('Unable to analyze query. Please try again.');
+        }
+    }
+
+    function displayResults(data) {
+        // Animate scores
+        animateScore('specificity', data.specificity_score || 0);
+        animateScore('quality', data.quality_score || 0);
+
+        // Update category
+        document.getElementById('category').textContent = data.category || 'Uncategorized';
+        if (data.subcategory) {
+            document.getElementById('subcategory').textContent = `• ${data.subcategory}`;
+        } else {
+            document.getElementById('subcategory').textContent = '';
+        }
+
+        // Update search intent
+        const intentMap = {
+            'browse': '🔍 Browsing',
+            'compare': '⚖️ Comparing',
+            'purchase': '🛒 Ready to Buy',
+            'research': '📊 Researching',
+            'unclear': '❓ Unclear',
+            'Product Discovery': '🔍 Product Discovery',
+            'Price Comparison': '💰 Price Comparison',
+            'Feature Comparison': '⚖️ Feature Comparison',
+            'Specific Purchase': '🛒 Specific Purchase'
+        };
+        const intentText = intentMap[data.search_intent] || data.search_intent || 'Analyzing...';
+        document.getElementById('searchIntent').textContent = intentText;
+
+        // Update lists
+        updateList('strengths', data.strengths, 'strengthsCard');
+        updateList('missingInfo', data.missing_information, 'missingCard');
+
+        // Update advice
+        document.getElementById('improvementAdvice').textContent = 
+            data.improvement_advice || 'Your query is already well-optimized!';
+        document.getElementById('improvedQuery').textContent = 
+            data.improved_query_suggestion || 'Your current query is great!';
+    }
+
+    function animateScore(type, targetScore) {
+        const scoreElement = document.getElementById(`${type}Score`);
+        const ringElement = document.getElementById(`${type}Ring`);
+        
+        // Animate number
+        let currentScore = 0;
+        const increment = targetScore / 30;
+        const timer = setInterval(() => {
+            currentScore += increment;
+            if (currentScore >= targetScore) {
+                currentScore = targetScore;
+                clearInterval(timer);
+            }
+            scoreElement.textContent = Math.round(currentScore);
+        }, 30);
+
+        // Animate ring
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (targetScore / 10) * circumference;
+        
+        setTimeout(() => {
+            ringElement.style.strokeDashoffset = offset;
+        }, 100);
+    }
+
+    function updateList(listId, items, cardId) {
+        const listElement = document.getElementById(listId);
+        const cardElement = document.getElementById(cardId);
+        
+        listElement.innerHTML = '';
+        
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                listElement.appendChild(li);
+            });
+            cardElement.style.display = 'block';
+        } else {
+            cardElement.style.display = 'none';
+        }
+    }
+
+    function showLoading() {
+        document.getElementById('loading').classList.add('active');
+        document.getElementById('submitBtn').disabled = true;
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function showResults() {
+        document.getElementById('results').classList.add('active');
+    }
+
+    function hideResults() {
+        document.getElementById('results').classList.remove('active');
+    }
+
+    function showError(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.classList.add('active');
+    }
+
+    function hideError() {
+        document.getElementById('errorMessage').classList.remove('active');
+    }
+</script>
+{% endblock %}

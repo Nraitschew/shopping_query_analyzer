@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Query Analyzer • Elevate Your Search</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-1: #FF006E;
+            --primary-2: #FB5607;
+            --primary-3: #FFBE0B;
+            --primary-4: #8338EC;
+            --primary-5: #3A86FF;
+            --accent-1: #FF4365;
+            --accent-2: #00F5FF;
+            --accent-3: #00D9FF;
+            --dark: #0A0E27;
+            --dark-light: #141829;
+            --white: #FFFFFF;
+            --gray-100: #F8F9FA;
+            --gray-200: #E9ECEF;
+            --gray-300: #DEE2E6;
+            --gray-400: #CED4DA;
+            --gray-500: #ADB5BD;
+            --gray-600: #6C757D;
+            --gray-700: #495057;
+            --gray-800: #343A40;
+            --gray-900: #212529;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --gradient-5: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            --gradient-6: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --gradient-rainbow: linear-gradient(90deg, #FF006E, #FB5607, #FFBE0B, #8338EC, #3A86FF);
+            --shadow-glow: 0 0 40px rgba(255, 0, 110, 0.3);
+            --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--gradient-2);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--gradient-3);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 5s;
+        }
+
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-4);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, -100px) scale(1.1) rotate(90deg);
+            }
+            50% {
+                transform: translate(-100px, 100px) scale(0.9) rotate(180deg);
+            }
+            75% {
+                transform: translate(50px, 50px) scale(1.05) rotate(270deg);
+            }
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            z-index: 1;
+        }
+
+        /* Header with animated text */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .logo {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-rainbow);
+            border-radius: 20px;
+            margin-bottom: 24px;
+            position: relative;
+            transform: rotate(45deg);
+            animation: logoRotate 20s linear infinite;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: var(--dark);
+            border-radius: 16px;
+        }
+
+        @keyframes logoRotate {
+            to { transform: rotate(405deg); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            background: var(--gradient-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        /* Input section with glass morphism */
+        .input-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-rainbow);
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 24px 32px;
+            font-size: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: var(--white);
+            transition: var(--transition-smooth);
+            font-weight: 500;
+        }
+
+        .query-input::placeholder {
+            color: var(--gray-600);
+        }
+
+        .query-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-1);
+            box-shadow: 0 0 0 4px rgba(255, 0, 110, 0.2), var(--shadow-glow);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px 40px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+            background: var(--gradient-2);
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.3);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::before {
+            width: 600px;
+            height: 600px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 0, 110, 0.5);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0) scale(1);
+        }
+
+        .submit-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Loading state */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--gradient-rainbow);
+            animation: bounce 1.4s infinite ease-in-out;
+            background-size: 200% 200%;
+            animation-fill-mode: both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0; }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Results section */
+        .results {
+            display: none;
+            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Score cards with unique visuals */
+        .scores-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .score-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .score-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--gradient-rainbow);
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        .score-card:hover::before {
+            opacity: 0.5;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .score-visual {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .score-ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .score-ring circle {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+        }
+
+        .score-ring .background {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+
+        .score-ring .progress {
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .score-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--gradient-rainbow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        /* Info cards */
+        .info-grid {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .info-card:hover::after {
+            opacity: 1;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--gradient-3);
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 4px 16px rgba(79, 172, 254, 0.3);
+        }
+
+        .intent-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .intent-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-rainbow);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .list-items {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .list-items li {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            padding-left: 36px;
+            transition: var(--transition-smooth);
+        }
+
+        .list-items li:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .list-items li::before {
+            content: '✨';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Advice section */
+        .advice-section {
+            background: var(--gradient-5);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .advice-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .advice-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .advice-text {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            font-size: 1.125rem;
+        }
+
+        .improved-query {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            position: relative;
+            text-align: center;
+        }
+
+        .improved-query::before {
+            content: '💡';
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        /* Error state */
+        .error-message {
+            background: rgba(255, 67, 101, 0.1);
+            border: 2px solid rgba(255, 67, 101, 0.5);
+            color: var(--accent-1);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .input-card {
+                padding: 32px 24px;
+            }
+
+            .scores-container {
+                grid-template-columns: 1fr;
+            }
+
+            .score-visual {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo"></div>
+            <h1>Query Analyzer</h1>
+            <p class="tagline">Transform your searches into shopping success</p>
+        </header>
+
+        <div class="input-card">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    class="query-input" 
+                    id="queryInput" 
+                    placeholder="Try: 'gaming laptop with RTX graphics under $1500'"
+                    autocomplete="off"
+                >
+            </div>
+            <button class="submit-btn" id="submitBtn" onclick="evaluateQuery()">
+                <span>Analyze My Query</span>
+            </button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <p>Analyzing your shopping query...</p>
+        </div>
+
+        <div class="results" id="results">
+            <div class="scores-container">
+                <div class="score-card">
+                    <div class="score-label">Specificity Score</div>
+                    <div class="score-visual">
+                        <svg class="score-ring" viewBox="0 0 120 120">
+                            <circle class="background" cx="60" cy="60" r="50" />
+                            <circle class="progress" id="specificityRing" cx="60" cy="60" r="50" 
+                                style="stroke: url(#gradient1)" />
+                        </svg>
+                        <div class="score-value" id="specificityScore">0</div>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <div class="score-label">Quality Score</div>
+                    <div class="score-visual">
+                        <svg class="score-ring" viewBox="0 0 120 120">
+                            <circle class="background" cx="60" cy="60" r="50" />
+                            <circle class="progress" id="qualityRing" cx="60" cy="60" r="50" 
+                                style="stroke: url(#gradient2)" />
+                        </svg>
+                        <div class="score-value" id="qualityScore">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Category Classification</div>
+                    <div>
+                        <span class="category-badge" id="category">Loading...</span>
+                        <span id="subcategory" style="margin-left: 12px; opacity: 0.8;"></span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">Search Intent</div>
+                    <div class="intent-indicator">
+                        <div class="intent-icon"></div>
+                        <span id="searchIntent">Analyzing...</span>
+                    </div>
+                </div>
+
+                <div class="info-card" id="strengthsCard">
+                    <div class="info-label">What You're Doing Right</div>
+                    <ul class="list-items" id="strengths"></ul>
+                </div>
+
+                <div class="info-card" id="missingCard">
+                    <div class="info-label">What Could Improve Your Results</div>
+                    <ul class="list-items" id="missingInfo"></ul>
+                </div>
+            </div>
+
+            <div class="advice-section">
+                <h3 class="advice-title">Pro Tips for Better Results</h3>
+                <p class="advice-text" id="improvementAdvice">Loading advice...</p>
+                <div class="improved-query" id="improvedQuery">Loading suggestion...</div>
+            </div>
+        </div>
+    </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#FF006E;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#FB5607;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#8338EC;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#3A86FF;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <script>
+        const WEBHOOK_URL = 'http://172.18.32.1:5678/webhook/5063a70b-f51b-4a3a-b4ca-414143e36845';
+        
+        // Handle Enter key
+        document.getElementById('queryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                evaluateQuery();
+            }
+        });
+
+        async function evaluateQuery() {
+            const queryInput = document.getElementById('queryInput');
+            const query = queryInput.value.trim();
+            
+            if (!query) {
+                showError('Please enter a shopping query to analyze');
+                return;
+            }
+
+            // Reset UI
+            hideError();
+            showLoading();
+            hideResults();
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                console.log('Raw webhook response:', responseData);
+                
+                // Handle the response format from n8n
+                let data;
+                if (Array.isArray(responseData) && responseData[0]?.output) {
+                    // Extract actual values from the schema descriptions
+                    const output = responseData[0].output;
+                    data = extractDataFromSchema(output);
+                } else {
+                    data = responseData;
+                }
+                
+                console.log('Processed data:', data);
+                displayResults(data);
+                hideLoading();
+                showResults();
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideLoading();
+                showError('Unable to analyze query. Please ensure the service is running.');
+            }
+        }
+
+        function extractDataFromSchema(schema) {
+            // Parse the description fields to extract actual values
+            const data = {};
+            
+            // Extract scores from descriptions
+            if (schema.specificity_score?.description) {
+                const match = schema.specificity_score.description.match(/\d+/);
+                data.specificity_score = match ? parseInt(match[0]) : 5;
+            }
+            
+            if (schema.quality_score?.description) {
+                const match = schema.quality_score.description.match(/\d+/);
+                data.quality_score = match ? parseInt(match[0]) : 5;
+            }
+            
+            // Extract string values
+            data.category = schema.category?.description || 'General';
+            data.subcategory = schema.subcategory?.description || '';
+            data.improvement_advice = schema.improvement_advice?.description || 'No specific advice available.';
+            data.improved_query_suggestion = schema.improved_query_suggestion?.description || query;
+            
+            // Extract search intent
+            if (schema.search_intent?.description) {
+                data.search_intent = schema.search_intent.description;
+            } else if (schema.search_intent?.enum && schema.search_intent.enum.length > 0) {
+                data.search_intent = schema.search_intent.enum[0];
+            } else {
+                data.search_intent = 'unclear';
+            }
+            
+            // Extract arrays from descriptions
+            if (schema.missing_information?.description) {
+                // Try to parse as a sentence containing items
+                const desc = schema.missing_information.description;
+                if (desc.includes('include')) {
+                    const items = desc.split('include')[1].split(',').map(item => item.trim().replace(/\.$/, ''));
+                    data.missing_information = items.filter(item => item.length > 0);
+                } else {
+                    data.missing_information = [desc];
+                }
+            } else {
+                data.missing_information = [];
+            }
+            
+            if (schema.strengths?.description) {
+                // Try to parse strengths from description
+                const desc = schema.strengths.description;
+                if (desc.includes('includes') || desc.includes(',')) {
+                    const items = desc.split(/includes|,/).map(item => item.trim().replace(/\.$/, ''));
+                    data.strengths = items.filter(item => item.length > 0 && item !== 'The query');
+                } else {
+                    data.strengths = [desc];
+                }
+            } else {
+                data.strengths = [];
+            }
+            
+            return data;
+        }
+
+        function displayResults(data) {
+            // Animate scores
+            animateScore('specificity', data.specificity_score || 0);
+            animateScore('quality', data.quality_score || 0);
+
+            // Update category
+            document.getElementById('category').textContent = data.category || 'Uncategorized';
+            if (data.subcategory) {
+                document.getElementById('subcategory').textContent = `• ${data.subcategory}`;
+            } else {
+                document.getElementById('subcategory').textContent = '';
+            }
+
+            // Update search intent
+            const intentMap = {
+                'browse': '🔍 Browsing',
+                'compare': '⚖️ Comparing',
+                'purchase': '🛒 Ready to Buy',
+                'research': '📊 Researching',
+                'unclear': '❓ Unclear',
+                'Product Discovery': '🔍 Product Discovery',
+                'Price Comparison': '💰 Price Comparison',
+                'Feature Comparison': '⚖️ Feature Comparison',
+                'Specific Purchase': '🛒 Specific Purchase'
+            };
+            const intentText = intentMap[data.search_intent] || data.search_intent || 'Analyzing...';
+            document.getElementById('searchIntent').textContent = intentText;
+
+            // Update strengths
+            updateList('strengths', data.strengths, 'strengthsCard');
+
+            // Update missing information
+            updateList('missingInfo', data.missing_information, 'missingCard');
+
+            // Update advice
+            document.getElementById('improvementAdvice').textContent = 
+                data.improvement_advice || 'Your query is already well-optimized!';
+            document.getElementById('improvedQuery').innerHTML = 
+                data.improved_query_suggestion || 'Your current query is great!';
+        }
+
+        function animateScore(type, targetScore) {
+            const scoreElement = document.getElementById(`${type}Score`);
+            const ringElement = document.getElementById(`${type}Ring`);
+            
+            // Animate number
+            let currentScore = 0;
+            const increment = targetScore / 30;
+            const timer = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= targetScore) {
+                    currentScore = targetScore;
+                    clearInterval(timer);
+                }
+                scoreElement.textContent = Math.round(currentScore);
+            }, 30);
+
+            // Animate ring
+            const circumference = 2 * Math.PI * 50;
+            const offset = circumference - (targetScore / 10) * circumference;
+            
+            setTimeout(() => {
+                ringElement.style.strokeDashoffset = offset;
+            }, 100);
+        }
+
+        function updateList(listId, items, cardId) {
+            const listElement = document.getElementById(listId);
+            const cardElement = document.getElementById(cardId);
+            
+            listElement.innerHTML = '';
+            
+            if (items && items.length > 0) {
+                items.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    li.style.animationDelay = `${index * 0.1}s`;
+                    li.style.animation = 'slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards';
+                    listElement.appendChild(li);
+                });
+                cardElement.style.display = 'block';
+            } else {
+                cardElement.style.display = 'none';
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function showResults() {
+            document.getElementById('results').classList.add('active');
+        }
+
+        function hideResults() {
+            document.getElementById('results').classList.remove('active');
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('active');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            console.log('Shopping Query Analyzer ready!');
+            // Uncomment to auto-test
+            // setTimeout(() => {
+            //     document.getElementById('queryInput').value = 'wireless noise-cancelling headphones for travel under $300';
+            //     evaluateQuery();
+            // }, 1000);
+        });
+    </script>
+</body>
+</html>

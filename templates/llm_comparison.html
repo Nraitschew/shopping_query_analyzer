@@ -1,0 +1,833 @@
+{% extends "base.html" %}
+
+{% block title %}LLM Comparison - Shopping Intelligence Suite{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Page header */
+    .page-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: var(--white);
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.1) rotate(180deg); }
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        position: relative;
+    }
+
+    /* Input section */
+    .input-section {
+        max-width: 800px;
+        margin: -2rem auto 3rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .input-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .query-input {
+        width: 100%;
+        padding: 1.5rem;
+        font-size: 1.125rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        transition: var(--transition);
+        font-family: inherit;
+        margin-bottom: 1.5rem;
+    }
+
+    .query-input:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(245, 54, 92, 0.1);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--white);
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(245, 54, 92, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 54, 92, 0.4);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Loading state */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .loading.active {
+        display: block;
+    }
+
+    .loading-animation {
+        display: inline-flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .ai-loader {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: var(--gray-200);
+        position: relative;
+        overflow: hidden;
+        animation: pulse-loader 2s infinite;
+    }
+
+    @keyframes pulse-loader {
+        0%, 100% { transform: scale(0.95); opacity: 0.7; }
+        50% { transform: scale(1); opacity: 1; }
+    }
+
+    .ai-loader.chatgpt {
+        background: linear-gradient(135deg, #74c0a8 0%, #4a9d83 100%);
+    }
+
+    .ai-loader.perplexity {
+        background: linear-gradient(135deg, #6b8cff 0%, #4361ee 100%);
+    }
+
+    /* Results section */
+    .results {
+        display: none;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .results.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Query display */
+    .query-display {
+        background: var(--gray-100);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .query-display h3 {
+        font-size: 1rem;
+        color: var(--gray-600);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .query-display p {
+        font-size: 1.25rem;
+        color: var(--dark);
+        font-weight: 600;
+    }
+
+    /* Comparison grid */
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .ai-section {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .ai-section.chatgpt::before {
+        background: linear-gradient(90deg, #74c0a8 0%, #4a9d83 100%);
+    }
+
+    .ai-section.perplexity::before {
+        background: linear-gradient(90deg, #6b8cff 0%, #4361ee 100%);
+    }
+
+    .ai-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .ai-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--white);
+        font-weight: bold;
+    }
+
+    .ai-icon.chatgpt {
+        background: linear-gradient(135deg, #74c0a8 0%, #4a9d83 100%);
+    }
+
+    .ai-icon.perplexity {
+        background: linear-gradient(135deg, #6b8cff 0%, #4361ee 100%);
+    }
+
+    .ai-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .overall-score {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .chatgpt .overall-score {
+        color: #4a9d83;
+    }
+
+    .perplexity .overall-score {
+        color: #4361ee;
+    }
+
+    /* Score breakdown */
+    .score-breakdown {
+        margin-bottom: 2rem;
+    }
+
+    .score-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .score-label {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    .score-bar {
+        flex: 1;
+        height: 8px;
+        background: var(--gray-200);
+        border-radius: 4px;
+        margin: 0 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .score-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chatgpt .score-fill {
+        background: linear-gradient(90deg, #74c0a8 0%, #4a9d83 100%);
+    }
+
+    .perplexity .score-fill {
+        background: linear-gradient(90deg, #6b8cff 0%, #4361ee 100%);
+    }
+
+    .score-value {
+        font-weight: 700;
+        min-width: 30px;
+        text-align: right;
+    }
+
+    /* Features lists */
+    .features-section {
+        margin-top: 2rem;
+    }
+
+    .features-section h4 {
+        font-size: 1rem;
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .features-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .features-list li {
+        padding: 0.5rem 0;
+        color: var(--gray-700);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .features-list li::before {
+        content: '•';
+        font-weight: bold;
+        margin-top: 2px;
+    }
+
+    .strength::before {
+        color: var(--success);
+        content: '✓';
+    }
+
+    .weakness::before {
+        color: var(--secondary);
+        content: '×';
+    }
+
+    /* Winner section */
+    .winner-section {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: var(--white);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .winner-section::before {
+        content: '🏆';
+        position: absolute;
+        font-size: 150px;
+        opacity: 0.1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .winner-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .winner-name {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .winner-reason {
+        font-size: 1.125rem;
+        opacity: 0.95;
+        position: relative;
+    }
+
+    /* Recommendations */
+    .recommendations {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 3rem;
+    }
+
+    .recommendations h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        color: var(--dark);
+    }
+
+    .recommendation-item {
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        background: var(--gray-100);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .recommendation-item h4 {
+        font-size: 1.125rem;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+
+    .recommendation-item p {
+        color: var(--gray-700);
+        line-height: 1.6;
+    }
+
+    /* Summary section */
+    .summary-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .summary-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .summary-card h4 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .summary-list {
+        list-style: none;
+    }
+
+    .summary-list li {
+        padding: 0.5rem 0;
+        color: var(--gray-700);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .summary-list li::before {
+        content: '→';
+        color: var(--primary);
+        font-weight: bold;
+    }
+
+    /* Error message */
+    .error-message {
+        background: rgba(245, 54, 92, 0.1);
+        border: 1px solid rgba(245, 54, 92, 0.3);
+        color: var(--secondary);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        display: none;
+        text-align: center;
+    }
+
+    .error-message.active {
+        display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .summary-section {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>LLM Shopping Comparison</h1>
+        <p>Compare ChatGPT vs Perplexity responses for your shopping queries</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="input-section">
+        <div class="input-card">
+            <input 
+                type="text" 
+                class="query-input" 
+                id="queryInput" 
+                placeholder="Enter your shopping query (e.g., 'best laptop for programming under $2000')"
+                autocomplete="off"
+            >
+            <button class="submit-btn" id="submitBtn" onclick="compareQuery()">
+                Compare AI Responses
+            </button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-animation">
+                <div class="ai-loader chatgpt"></div>
+                <div class="ai-loader perplexity"></div>
+            </div>
+            <p>Comparing AI responses...</p>
+        </div>
+    </div>
+
+    <div class="results" id="results">
+        <!-- Query Display -->
+        <div class="query-display">
+            <h3>Shopping Query</h3>
+            <p id="displayedQuery">-</p>
+        </div>
+
+        <!-- Comparison Grid -->
+        <div class="comparison-grid">
+            <!-- ChatGPT Section -->
+            <div class="ai-section chatgpt">
+                <div class="ai-header">
+                    <div class="ai-icon chatgpt">C</div>
+                    <div class="ai-name">ChatGPT</div>
+                </div>
+                <div class="overall-score" id="chatgptOverallScore">0</div>
+                
+                <div class="score-breakdown" id="chatgptScores">
+                    <!-- Scores will be dynamically inserted -->
+                </div>
+
+                <div class="features-section">
+                    <h4>Strengths</h4>
+                    <ul class="features-list" id="chatgptStrengths"></ul>
+                </div>
+
+                <div class="features-section">
+                    <h4>Weaknesses</h4>
+                    <ul class="features-list" id="chatgptWeaknesses"></ul>
+                </div>
+            </div>
+
+            <!-- Perplexity Section -->
+            <div class="ai-section perplexity">
+                <div class="ai-header">
+                    <div class="ai-icon perplexity">P</div>
+                    <div class="ai-name">Perplexity</div>
+                </div>
+                <div class="overall-score" id="perplexityOverallScore">0</div>
+                
+                <div class="score-breakdown" id="perplexityScores">
+                    <!-- Scores will be dynamically inserted -->
+                </div>
+
+                <div class="features-section">
+                    <h4>Strengths</h4>
+                    <ul class="features-list" id="perplexityStrengths"></ul>
+                </div>
+
+                <div class="features-section">
+                    <h4>Weaknesses</h4>
+                    <ul class="features-list" id="perplexityWeaknesses"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Winner Section -->
+        <div class="winner-section" id="winnerSection">
+            <h3 class="winner-title">Winner for this Query</h3>
+            <div class="winner-name" id="winnerName">-</div>
+            <p class="winner-reason" id="winnerReason">-</p>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <h3>Usage Recommendations</h3>
+            <div class="recommendation-item">
+                <h4>For This Query</h4>
+                <p id="queryRecommendation">-</p>
+            </div>
+            <div class="recommendation-item">
+                <h4>General Recommendation</h4>
+                <p id="generalRecommendation">-</p>
+            </div>
+            <div class="recommendation-item">
+                <h4>Optimal Combination</h4>
+                <p id="optimalCombination">-</p>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h4>Consensus Points</h4>
+                <ul class="summary-list" id="consensusPoints"></ul>
+            </div>
+            <div class="summary-card">
+                <h4>Key Differences</h4>
+                <ul class="summary-list" id="differences"></ul>
+            </div>
+            <div class="summary-card">
+                <h4>Missing Information</h4>
+                <ul class="summary-list" id="missingInfo"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Handle Enter key
+    document.getElementById('queryInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            compareQuery();
+        }
+    });
+
+    async function compareQuery() {
+        const queryInput = document.getElementById('queryInput');
+        const query = queryInput.value.trim();
+        
+        if (!query) {
+            showError('Please enter a shopping query to compare');
+            return;
+        }
+
+        // Reset UI
+        hideError();
+        showLoading();
+        hideResults();
+
+        try {
+            const response = await fetch('/api/compare-llms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to compare LLMs');
+            }
+
+            const data = await response.json();
+            console.log('LLM comparison result:', data);
+            
+            displayResults(data);
+            hideLoading();
+            showResults();
+
+        } catch (error) {
+            console.error('Error:', error);
+            hideLoading();
+            showError('Unable to compare responses. Please try again.');
+        }
+    }
+
+    function displayResults(data) {
+        // Display query
+        document.getElementById('displayedQuery').textContent = data.shopping_query || 'Unknown query';
+
+        // Display ChatGPT scores
+        displayAIScores('chatgpt', data.chatgpt_evaluation);
+        
+        // Display Perplexity scores
+        displayAIScores('perplexity', data.perplexity_evaluation);
+
+        // Display winner
+        const winner = data.direct_comparison?.winner || 'Tie';
+        document.getElementById('winnerName').textContent = winner;
+        document.getElementById('winnerReason').textContent = 
+            data.direct_comparison?.winning_rationale || 'Both provided valuable insights';
+
+        // Display recommendations
+        document.getElementById('queryRecommendation').textContent = 
+            data.usage_recommendation?.for_this_query || 'Both are suitable for this query';
+        document.getElementById('generalRecommendation').textContent = 
+            data.usage_recommendation?.general_recommendation || 'Choose based on your specific needs';
+        document.getElementById('optimalCombination').textContent = 
+            data.usage_recommendation?.optimal_combination || 'Use both for comprehensive results';
+
+        // Display summary lists
+        updateSummaryList('consensusPoints', data.summary?.consensus_points);
+        updateSummaryList('differences', data.summary?.differences);
+        updateSummaryList('missingInfo', data.summary?.missing_information);
+    }
+
+    function displayAIScores(aiType, evaluation) {
+        if (!evaluation) return;
+
+        // Overall score
+        const overallScore = evaluation.scores?.overall_score || 0;
+        document.getElementById(`${aiType}OverallScore`).textContent = overallScore.toFixed(1);
+
+        // Score breakdown
+        const scoresContainer = document.getElementById(`${aiType}Scores`);
+        scoresContainer.innerHTML = '';
+
+        const scoreTypes = ['relevance', 'completeness', 'actionability', 'accuracy', 'structure', 'added_value'];
+        const scoreLabels = {
+            'relevance': 'Relevance',
+            'completeness': 'Completeness',
+            'actionability': 'Actionability',
+            'accuracy': 'Accuracy',
+            'structure': 'Structure',
+            'added_value': 'Added Value'
+        };
+
+        scoreTypes.forEach(scoreType => {
+            const score = evaluation.scores?.[scoreType] || 0;
+            const scoreItem = createScoreItem(scoreLabels[scoreType], score);
+            scoresContainer.appendChild(scoreItem);
+        });
+
+        // Strengths
+        updateFeaturesList(`${aiType}Strengths`, evaluation.strengths, 'strength');
+        
+        // Weaknesses
+        updateFeaturesList(`${aiType}Weaknesses`, evaluation.weaknesses, 'weakness');
+    }
+
+    function createScoreItem(label, score) {
+        const div = document.createElement('div');
+        div.className = 'score-item';
+        
+        div.innerHTML = `
+            <span class="score-label">${label}</span>
+            <div class="score-bar">
+                <div class="score-fill" style="width: 0%"></div>
+            </div>
+            <span class="score-value">${score}</span>
+        `;
+
+        // Animate score bar after a short delay
+        setTimeout(() => {
+            div.querySelector('.score-fill').style.width = `${score * 10}%`;
+        }, 100);
+
+        return div;
+    }
+
+    function updateFeaturesList(listId, items, className) {
+        const listElement = document.getElementById(listId);
+        listElement.innerHTML = '';
+        
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = className;
+                li.textContent = item;
+                listElement.appendChild(li);
+            });
+        }
+    }
+
+    function updateSummaryList(listId, items) {
+        const listElement = document.getElementById(listId);
+        listElement.innerHTML = '';
+        
+        if (items && items.length > 0) {
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                listElement.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'No data available';
+            li.style.color = 'var(--gray-500)';
+            listElement.appendChild(li);
+        }
+    }
+
+    function showLoading() {
+        document.getElementById('loading').classList.add('active');
+        document.getElementById('submitBtn').disabled = true;
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function showResults() {
+        document.getElementById('results').classList.add('active');
+    }
+
+    function hideResults() {
+        document.getElementById('results').classList.remove('active');
+    }
+
+    function showError(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.classList.add('active');
+    }
+
+    function hideError() {
+        document.getElementById('errorMessage').classList.remove('active');
+    }
+</script>
+{% endblock %}
